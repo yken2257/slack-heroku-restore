@@ -32,7 +32,7 @@ slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", 
 @slack_events_adapter.on("reaction_added")
 def reaction_added(event_data):
     emoji = event_data["event"]["reaction"]
-    channel = event["item"]["channel"]
+    channel = event_data["item"]["channel"]
     text = ":%s:" % emoji
     print(emoji)
     client.chat_postMessage(channel=channel, text=text)
