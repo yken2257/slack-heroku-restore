@@ -1,1 +1,1 @@
-web: gunicorn app:aoo --log-file=-
+web: python index.py
