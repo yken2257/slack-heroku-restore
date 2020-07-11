@@ -10,3 +10,8 @@ def main():
     dumped = dumps(data)
     if dumped['type'] == 'url_verification':
         return jsonify({'challenge': dumped['challenge']}), 200
+    else:
+        return 200
+
+if __name__ == '__main__':
+    app.run()
