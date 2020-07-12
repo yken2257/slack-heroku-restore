@@ -1,13 +1,14 @@
 import os
-import datetime
+from datetime import datetime, timedelta, timezone
 from flask import Flask, jsonify, request
 from slackeventsapi import SlackEventAdapter
 from slack import WebClient
 #from json import dumps
 
-
+JST = timezone(timedelta(hours=+9), 'JST')
 SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
 client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
+
 app = Flask(__name__)
 
 
@@ -46,7 +47,7 @@ def reaction_added(event_data):
     #print(convs)
     print(content["title_link"])
     print(content["text"])
-    dt = datetime.datetime.fromtimestamp(int(ts[:10]))
+    dt = datetime.fromtimestamp(int(ts[:10]), JST)
     dt = f"{dt:%Y-%m-%d %H:%M:%S}"
     print(dt)
 
