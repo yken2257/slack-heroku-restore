@@ -40,7 +40,7 @@ def reaction_added(event_data):
     print(event_data)
     client.chat_postMessage(channel=channel, text=text)
     convs = client.conversations_replies(channel=channel, ts=ts)
-    content = convs["messages"]["attachments"][0]
+    content = convs["messages"][0]["attachments"]
     print(content)
     print(convs)
     print(content["tile_link"])
