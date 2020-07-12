@@ -1,4 +1,5 @@
 import os
+import datetime
 from flask import Flask, jsonify, request
 from slackeventsapi import SlackEventAdapter
 from slack import WebClient
@@ -45,6 +46,9 @@ def reaction_added(event_data):
     #print(convs)
     print(content["title_link"])
     print(content["text"])
+    dt = datetime.datetime.fromtimestamp(int(ts[:10]))
+    dt = f"{dt:%Y-%m-%d %H:%M:%S}"
+    print(dt)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 3000)))
