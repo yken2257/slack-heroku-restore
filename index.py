@@ -32,12 +32,14 @@ slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", 
 @slack_events_adapter.on("reaction_added")
 def reaction_added(event_data):
     emoji = event_data["event"]["reaction"]
-    #channel = event_data["item"]["channel"]
-    #text = ":%s:" % emoji
+    channel = event_data["event"]["channel"]
+    ts = event_data["event"]["ts"]
+    text = ":%s:" % emoji
     print(emoji)
     print(event_data)
-    #client.chat_postMessage(channel=channel, text=str(event_data))
-
+    client.chat_postMessage(channel=channel, text=text)
+    convs = client.conversations_replies(channel=channel, ts=ts)
+    print(convs)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 3000)))
