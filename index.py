@@ -79,11 +79,12 @@ def reaction_added(event_data):
     # print(convs)
     link = content["title_link"]
     text = content["text"]
+    text_sql = text.replace("'", "''")
     dt = datetime.fromtimestamp(int(ts[:10]), JST)
     dt = f"{dt:%Y-%m-%d %H:%M:%S}"
     print(dt)
 
-    engine.execute(f"insert into {table} values ('{dt}', '{link}', '{text}', '{emoji}');")
+    engine.execute(f"insert into {table} values ('{dt}', '{link}', '{text_sql}', '{emoji}');")
     wrksht = gc.open_by_key(spreadsheet_key).sheet1
     if emoji == '-1':
         add_list = [dt, link, text]
