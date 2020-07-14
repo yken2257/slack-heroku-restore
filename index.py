@@ -5,9 +5,10 @@ from slackeventsapi import SlackEventAdapter
 from slack import WebClient
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-#import pandas as pd
+from sqlalchemy import create_engine
 
-#from json import dumps
+# import pandas as pd
+# from json import dumps
 
 JST = timezone(timedelta(hours=+9), 'JST')
 
@@ -24,7 +25,7 @@ cred_dict = {
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
     "token_uri": "https://oauth2.googleapis.com/token",
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_x509_cert_url":  os.environ['SHEET_CLIENT_X509_CERT_URL']
+    "client_x509_cert_url": os.environ['SHEET_CLIENT_X509_CERT_URL']
 }
 
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(cred_dict, scope)
@@ -32,10 +33,12 @@ credentials = ServiceAccountCredentials.from_json_keyfile_dict(cred_dict, scope)
 gc = gspread.authorize(credentials)
 spreadsheet_key = os.environ['SPREADSHEET_KEY']
 
-
 SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
 client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 
+db_url = os.environ.get('DATABASE_URL')
+engine = create_engine(db_url)
+table = 'tweets'
 
 app = Flask(__name__)
 
@@ -43,17 +46,19 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def main():
     data = request.get_json()
-    #dumped = dumps(data)
-    #print(dumped)
-    #print(type(data))
+    # dumped = dumps(data)
+    # print(dumped)
+    # print(type(data))
     if data['type'] == 'url_verification':
         return jsonify({'challenge': data['challenge']}), 200
     else:
-        return jsonify({'test':'test'}), 200
+        return jsonify({'test': 'test'}), 200
+
 
 @app.route('/test')
 def hello():
     return 'Hello, World!\n'
+
 
 slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", app)
 
@@ -66,23 +71,25 @@ def reaction_added(event_data):
     ts = event_data["event"]["item"]["ts"]
     print(type(ts))
     print(emoji)
-    #print(event_data)
-    #client.chat_postMessage(channel=channel, text=text)
+    # print(event_data)
+    # client.chat_postMessage(channel=channel, text=text)
     convs = client.conversations_replies(channel=channel, ts=ts)
     content = convs["messages"][0]["attachments"][0]
     print(content)
-    #print(convs)
+    # print(convs)
     link = content["title_link"]
     text = content["text"]
     dt = datetime.fromtimestamp(int(ts[:10]), JST)
     dt = f"{dt:%Y-%m-%d %H:%M:%S}"
     print(dt)
 
+    engine.execute(f"insert into {table} values ('{dt}', '{url}', '{text}', '{emoji}');")
     wrksht = gc.open_by_key(spreadsheet_key).sheet1
     if emoji == '-1':
         add_list = [dt, link, text]
         print(add_list)
         wrksht.append_row(add_list)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 3000)))
