@@ -83,7 +83,7 @@ def reaction_added(event_data):
     dt = f"{dt:%Y-%m-%d %H:%M:%S}"
     print(dt)
 
-    engine.execute(f"insert into {table} values ('{dt}', '{url}', '{text}', '{emoji}');")
+    engine.execute(f"insert into {table} values ('{dt}', '{link}', '{text}', '{emoji}');")
     wrksht = gc.open_by_key(spreadsheet_key).sheet1
     if emoji == '-1':
         add_list = [dt, link, text]
